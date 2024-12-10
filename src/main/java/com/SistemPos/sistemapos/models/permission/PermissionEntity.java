@@ -1,4 +1,4 @@
-package com.SistemPos.sistemapos.persistence.entity;
+package com.SistemPos.sistemapos.models.permission;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,9 +17,12 @@ public class PermissionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true, nullable = true, updatable = false )
+    @Column(unique = true, nullable = false, updatable = false )
     @Enumerated(EnumType.STRING)
     private EPermisos name;
 
 
+    public PermissionEntity(EPermisos name) {
+        this.name = name;
+    }
 }

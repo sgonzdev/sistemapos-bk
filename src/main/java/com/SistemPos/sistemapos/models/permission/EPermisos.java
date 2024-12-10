@@ -1,4 +1,4 @@
-package com.SistemPos.sistemapos.persistence.entity;
+package com.SistemPos.sistemapos.models.permission;
 
 public enum EPermisos {
     GESTIONAR_PRODUCTOS,

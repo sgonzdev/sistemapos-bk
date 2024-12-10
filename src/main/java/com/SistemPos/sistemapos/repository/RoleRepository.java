@@ -1,9 +1,11 @@
 package com.SistemPos.sistemapos.repository;
 
-import com.SistemPos.sistemapos.persistence.entity.ERoles;
-import com.SistemPos.sistemapos.persistence.entity.RolEntity;
-import org.springframework.data.repository.CrudRepository;
+import com.SistemPos.sistemapos.models.roles.ERoles;
+import com.SistemPos.sistemapos.models.roles.RolEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RoleRepository extends CrudRepository<RolEntity, Long> {
-    RolEntity findByName(ERoles name);
+import java.util.Optional;
+
+public interface RoleRepository extends JpaRepository<RolEntity, Long> {
+    Optional<RolEntity> findByName(ERoles name);
 }
