@@ -1,8 +1,8 @@
-package com.SistemPos.sistemapos.persistence.entity;
+package com.SistemPos.sistemapos.models.roles;
 
+import com.SistemPos.sistemapos.models.permission.PermissionEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
 

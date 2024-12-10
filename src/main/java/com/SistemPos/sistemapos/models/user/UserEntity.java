@@ -1,11 +1,9 @@
-package com.SistemPos.sistemapos.persistence.entity;
+package com.SistemPos.sistemapos.models.user;
 
+import com.SistemPos.sistemapos.models.roles.RolEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -32,11 +30,9 @@ public class UserEntity {
     @Column(name = "is_credentials_non_expired")
     private boolean isCredentialsNonExpired;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "user_id", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<RolEntity> roles = new HashSet<>();
-
-
-
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserProfileEntity profile;
 }

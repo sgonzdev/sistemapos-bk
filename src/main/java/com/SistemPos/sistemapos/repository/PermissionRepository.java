@@ -1,9 +1,9 @@
 package com.SistemPos.sistemapos.repository;
 
-import com.SistemPos.sistemapos.persistence.entity.EPermisos;
-import com.SistemPos.sistemapos.persistence.entity.PermissionEntity;
-import org.springframework.data.repository.CrudRepository;
+import com.SistemPos.sistemapos.models.permission.EPermisos;
+import com.SistemPos.sistemapos.models.permission.PermissionEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PermissionRepository extends CrudRepository<PermissionEntity, Long> {
+public interface PermissionRepository extends JpaRepository<PermissionEntity, Long> {
     PermissionEntity findByName(EPermisos name);
 }

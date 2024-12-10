@@ -1,60 +1,63 @@
 package com.SistemPos.sistemapos.init;
-import com.SistemPos.sistemapos.persistence.entity.EPermisos;
-import com.SistemPos.sistemapos.persistence.entity.ERoles;
-import com.SistemPos.sistemapos.persistence.entity.PermissionEntity;
-import com.SistemPos.sistemapos.persistence.entity.RolEntity;
+import com.SistemPos.sistemapos.models.permission.EPermisos;
+import com.SistemPos.sistemapos.models.roles.ERoles;
+import com.SistemPos.sistemapos.models.permission.PermissionEntity;
+import com.SistemPos.sistemapos.models.roles.RolEntity;
 import com.SistemPos.sistemapos.repository.PermissionRepository;
 import com.SistemPos.sistemapos.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class DataLoader implements CommandLineRunner {
 
-    @Autowired
-    private RoleRepository roleRepository; // Tu repositorio de roles
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
 
-    @Autowired
-    private PermissionRepository permissionRepository; // Tu repositorio de permisos
+    public DataLoader(RoleRepository roleRepository, PermissionRepository permissionRepository) {
+        this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
+    }
 
     @Override
-    public void run(String... args) throws Exception {
-        // Verifica si los permisos ya existen, si no, créalos
+    public void run(String... args) {
+        loadPermissions();
+        loadRoles();
+    }
+
+    private void loadPermissions() {
         if (permissionRepository.count() == 0) {
-            // Crear permisos
-            for (EPermisos permiso : EPermisos.values()) {
-                PermissionEntity permisoEntity = new PermissionEntity();
-                permisoEntity.setName(permiso);
-                permissionRepository.save(permisoEntity);
-            }
+            Arrays.stream(EPermisos.values())
+                    .map(PermissionEntity::new)
+                    .forEach(permissionRepository::save);
         }
+    }
 
-        // Verifica si los roles ya existen, si no, créalos
+    private void loadRoles() {
         if (roleRepository.count() == 0) {
-            // Crear roles con permisos
-            PermissionEntity gestionarProductos = permissionRepository.findByName(EPermisos.GESTIONAR_PRODUCTOS);
-            PermissionEntity verInventario = permissionRepository.findByName(EPermisos.VER_INVENTARIO);
-            PermissionEntity gestionarVentas = permissionRepository.findByName(EPermisos.GESTIONAR_VENTAS);
-            PermissionEntity verReportes = permissionRepository.findByName(EPermisos.VER_REPORTES);
+            Map<ERoles, Set<EPermisos>> rolePermissions = Map.of(
+                    ERoles.ADMIN, Set.of(EPermisos.GESTIONAR_PRODUCTOS, EPermisos.VER_INVENTARIO, EPermisos.GESTIONAR_VENTAS, EPermisos.VER_REPORTES),
+                    ERoles.SUPERVISOR, Set.of(EPermisos.VER_INVENTARIO, EPermisos.VER_REPORTES),
+                    ERoles.CAJERO, Set.of(EPermisos.GESTIONAR_VENTAS, EPermisos.VER_INVENTARIO),
+                    ERoles.CLIENTE, Set.of(EPermisos.VER_INVENTARIO)
+            );
 
-            // Crear roles
-            RolEntity adminRole = new RolEntity();
-            adminRole.setName(ERoles.ROLE_ADMIN);
-            adminRole.setPermissionsList(new HashSet<>(Arrays.asList(gestionarProductos, verInventario, gestionarVentas, verReportes)));
-
-            RolEntity supervisorRole = new RolEntity();
-            supervisorRole.setName(ERoles.ROLE_SUPERVISOR);
-            supervisorRole.setPermissionsList(new HashSet<>(Arrays.asList(verInventario, verReportes)));
-
-            RolEntity cashierRole = new RolEntity();
-            cashierRole.setName(ERoles.ROLE_CAJERO);
-            cashierRole.setPermissionsList(new HashSet<>(Arrays.asList(gestionarVentas, verInventario)));
-
-            roleRepository.saveAll(Arrays.asList(adminRole, cashierRole, supervisorRole));
+            rolePermissions.forEach((role, permission) -> {
+                RolEntity roleEntity = new RolEntity();
+                roleEntity.setName(role);
+                roleEntity.setPermissionsList(getPermissionEntities(permission));
+                roleRepository.save(roleEntity);
+            });
         }
+    }
+
+    private Set<PermissionEntity> getPermissionEntities(Set<EPermisos> permission) {
+        return permission.stream()
+                .map(permissionRepository::findByName)
+                .collect(Collectors.toSet());
     }
 }
